@@ -1,0 +1,8 @@
+{
+  "name": "[Official] Portal KADIN Indonesia",
+  "description": "A web application for managing KADIN Indonesia membership, including registration, renewal, and member management, based on the official procedures.",
+  "requestFramePermissions": [
+    "geolocation",
+    "camera"
+  ]
+}

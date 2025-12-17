@@ -12,6 +12,7 @@ import {
   GoogleIcon,
   LinkedInIcon,
   ExclamationTriangleIcon,
+  EyeIcon,
 } from "../components/icons";
 import supabase from "@/src/supabase-client";
 
@@ -95,6 +96,8 @@ const RegistrationPage: React.FC<RegistrationPageProps> = ({
   const [otpError, setOtpError] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
   const [isVerified, setIsVerified] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const steps = ["Tipe KTA", "Buat Akun", "Verifikasi", "Selesai"];
   const currentStepIndex = [
@@ -231,7 +234,7 @@ const RegistrationPage: React.FC<RegistrationPageProps> = ({
 
       // SET PASSWORD di Supabase Auth (lebih aman)
       const { error: updateError } = await supabase.auth.updateUser({
-        password: formData.password, // pastikan ini ada
+        password: formData.password,
       });
       if (updateError) throw updateError;
 
@@ -397,22 +400,40 @@ const RegistrationPage: React.FC<RegistrationPageProps> = ({
                   required
                   className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md"
                 />
-                <input
-                  name="password"
-                  type="password"
-                  placeholder="Password"
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md"
-                />
-                <input
-                  name="confirmPassword"
-                  type="password"
-                  placeholder="Konfirmasi Password"
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md"
-                />
+                <div className="relative">
+                  <input
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  >
+                    <EyeIcon className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Konfirmasi Password"
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  >
+                    <EyeIcon className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
               <CardFooter className="p-0 pt-6 mt-6">
                 <button

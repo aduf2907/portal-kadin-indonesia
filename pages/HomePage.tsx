@@ -352,11 +352,11 @@ const HomePage: React.FC<HomePageProps> = ({
                   <div className="flex items-start gap-4">
                     <div className="flex-shrink-0 text-center bg-red-100 p-3 rounded-lg w-20">
                       <p className="text-3xl font-bold text-red-600">
-                        {event.date.day}
+                        {event.date}
                       </p>
-                      <p className="text-sm font-semibold text-red-500">
-                        {event.date.month}
-                      </p>
+                      {/* <p className="text-sm font-semibold text-red-500">
+                        {event.date}
+                      </p> */}
                     </div>
                     <div>
                       <span className="text-sm font-semibold text-slate-500">

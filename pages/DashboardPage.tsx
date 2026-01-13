@@ -116,13 +116,6 @@ const PerusahaanTab: React.FC<{
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    // setTimeout(() => {
-    //   setIsLoading(false);
-    //   addNotification("Data perusahaan berhasil diperbarui.", "success");
-    //   // In a real app, you might refetch or just update the initial state
-    //   console.log("Saved company data:", companyData);
-    // }, 1500);
     const {
       data: { user },
     } = await supabase.auth.getUser();

@@ -6,6 +6,7 @@ import RegistrationPage from "./pages/RegistrationPage";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import BeritaPage from "./pages/BeritaPage";
+import AgendaPage from "./pages/AgendaPage";
 import ForumPage from "./pages/ForumPage";
 import Kadin360Page from "./pages/Kadin360Page";
 import EventDetailsPage from "./pages/EventDetailsPage";
@@ -25,7 +26,7 @@ import supabase from "./src/supabase-client";
 const upcomingEvents: KadinEvent[] = [
   {
     id: "rapimnas-2025",
-    date: { day: "30", month: "NOV" },
+    date: "30 NOV",
     year: "2025",
     title: "RAPIMNAS Kadin 2025",
     location: "Jakarta Convention Center, Jakarta",
@@ -62,7 +63,7 @@ const upcomingEvents: KadinEvent[] = [
   },
   {
     id: "tech-summit-2025",
-    date: { day: "15", month: "OKT" },
+    date: "15 OKT",
     year: "2025",
     title: "KADIN Tech Summit 2025",
     location: "Bali International Convention Centre, Bali",
@@ -173,6 +174,21 @@ const App: React.FC = () => {
     handleAuth();
   }, []);
 
+  useEffect(() => {
+    const initAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session) {
+        setIsAuthenticated(true);
+        setCurrentPage("dashboard");
+      }
+    };
+
+    initAuth();
+  }, []);
+
   type Step = "TYPE_SELECTION" | "ACCOUNT_CREATION" | "OTP" | "SUCCESS";
 
   const [step, setStep] = useState<Step>("TYPE_SELECTION");
@@ -281,6 +297,15 @@ const App: React.FC = () => {
           return <DashboardPage addNotification={addNotification} />;
         case "berita":
           return <BeritaPage />;
+        case "agenda":
+          return (
+            <AgendaPage
+              events={upcomingEvents}
+              viewEventDetails={handleViewEventDetails}
+              isAuthenticated={isAuthenticated}
+              navigateTo={navigateTo}
+            />
+          );
         case "directory":
           return <DirectoryPage addNotification={addNotification} />;
         case "forum":

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Page, NotificationType } from "../types";
 import Card, { CardContent, CardHeader, CardFooter } from "../components/Card";
 import { KadinLogo } from "../components/KadinLogo";
@@ -21,26 +21,25 @@ const LoginPage: React.FC<LoginPageProps> = ({
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const params = new URLSearchParams(window.location.search);
+  const redirectUrl = params.get("redirect") || "http://localhost:3000";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
-    // Simulate API call
-    // setTimeout(() => {
-    //   if (email === "anggota@kadin.id" && password === "password123") {
-    //     onLoginSuccess(rememberMe);
-    //   } else {
-    //     setError("Email atau password salah. Silakan coba lagi.");
-    //     setIsLoading(false);
-    //   }
-    // }, 1500);
-
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+
+    // if (error || !data.session) {
+    //   setError("Email atau password salah. Silakan coba lagi.");
+    //   setIsLoading(false);
+    //   return;
+    // }
+    // window.location.replace(redirectUrl);
 
     if (error) {
       setError("Email atau password salah. Silakan coba lagi.");
@@ -51,12 +50,30 @@ const LoginPage: React.FC<LoginPageProps> = ({
     setIsLoading(false);
   };
 
-  const handleSocialLogin = (provider: "Google" | "LinkedIn") => {
-    addNotification(
-      `Fitur login dengan ${provider} akan segera tersedia.`,
-      "info"
-    );
+  // const handleSocialLogin = (provider: "Google" | "LinkedIn") => {
+  //   addNotification(
+  //     `Fitur login dengan ${provider} akan segera tersedia.`,
+  //     "info"
+  //   );
+  // };
+
+  const handleSocialLogin = async (provider: "google" | "linkedin") => {
+    await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: redirectUrl,
+      },
+    });
   };
+
+  // ini edit
+  // useEffect(() => {
+  //   supabase.auth.getSession().then(({ data }) => {
+  //     if (data.session) {
+  //       window.location.replace(redirectUrl);
+  //     }
+  //   });
+  // }, []);
 
   return (
     <div className="max-w-md mx-auto">
@@ -139,10 +156,6 @@ const LoginPage: React.FC<LoginPageProps> = ({
                 </div>
               </div>
             </div>
-            {/* <div className="p-2 bg-amber-100 text-amber-800 text-sm rounded-md text-center">
-              Untuk demo, gunakan email: <strong>anggota@kadin.id</strong> dan
-              password: <strong>password123</strong>
-            </div> */}
           </CardContent>
           <CardFooter className="p-6">
             <button
@@ -192,7 +205,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
         <div className="px-6 pb-6 space-y-3">
           <button
             type="button"
-            onClick={() => handleSocialLogin("Google")}
+            onClick={() => handleSocialLogin("google")}
             className="w-full inline-flex items-center justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             <GoogleIcon className="w-5 h-5 mr-3" />
@@ -200,7 +213,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
           </button>
           <button
             type="button"
-            onClick={() => handleSocialLogin("LinkedIn")}
+            onClick={() => handleSocialLogin("linkedin")}
             className="w-full inline-flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm bg-[#0077B5] text-sm font-medium text-white hover:bg-[#006097]"
           >
             <LinkedInIcon className="w-5 h-5 mr-3 text-white" />

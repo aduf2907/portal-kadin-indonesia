@@ -1,11 +1,26 @@
 // Fix: Define all necessary types for the application.
-export type Page = 'home' | 'register' | 'login' | 'dashboard' | 'berita' | 'forum' | 'kadin360' | 'eventDetails' | 'directory' | 'forgotPassword';
+export type Page =
+  | "home"
+  | "register"
+  | "login"
+  | "dashboard"
+  | "berita"
+  | "agenda"
+  | "forum"
+  | "kadin360"
+  | "eventDetails"
+  | "directory"
+  | "forgotPassword"
+  | "admin";
 
-export type RegistrationType = 'Daftar Baru' | 'Perpanjang KTA' | 'Registrasi Ulang';
+export type RegistrationType =
+  | "Daftar Baru"
+  | "Perpanjang KTA"
+  | "Registrasi Ulang";
 
-export type MembershipType = 'Anggota Biasa (AB)' | 'Anggota Luar Biasa (ALB)';
+export type MembershipType = "Anggota Biasa (AB)" | "Anggota Luar Biasa (ALB)";
 
-export type NotificationType = 'success' | 'warning' | 'info' | 'error';
+export type NotificationType = "success" | "warning" | "info" | "error";
 
 export interface AppNotification {
   id: number;
@@ -15,11 +30,16 @@ export interface AppNotification {
   timestamp: Date;
 }
 
-export type DashboardTab = 'profil' | 'perusahaan' | 'anggota' | 'pembayaran' | 'pengaturan';
+export type DashboardTab =
+  | "profil"
+  | "perusahaan"
+  | "anggota"
+  | "pembayaran"
+  | "pengaturan";
 
 export interface KadinEvent {
   id: string;
-  date: { day: string; month: string };
+  date: string;
   year: string;
   title: string;
   location: string;

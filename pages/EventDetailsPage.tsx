@@ -1,7 +1,15 @@
-import React, { useState } from 'react';
-import Card, { CardContent, CardFooter, CardHeader } from '../components/Card';
-import { KadinEvent, NotificationType, Page } from '../types';
-import { CalendarDaysIcon, MapPinIcon, ClockIcon, CheckCircleIcon, TicketIcon, UserCircleIcon, ArrowDownTrayIcon } from '../components/icons';
+import React, { useState } from "react";
+import Card, { CardContent, CardFooter, CardHeader } from "../components/Card";
+import { KadinEvent, NotificationType, Page } from "../types";
+import {
+  CalendarDaysIcon,
+  MapPinIcon,
+  ClockIcon,
+  CheckCircleIcon,
+  TicketIcon,
+  UserCircleIcon,
+  ArrowDownTrayIcon,
+} from "../components/icons";
 
 interface EventDetailsPageProps {
   event: KadinEvent;
@@ -11,12 +19,18 @@ interface EventDetailsPageProps {
   viewEventDetails: (eventId: string) => void;
 }
 
-const EventDetailsPage: React.FC<EventDetailsPageProps> = ({ event, addNotification, navigateTo, allEvents, viewEventDetails }) => {
+const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
+  event,
+  addNotification,
+  navigateTo,
+  allEvents,
+  viewEventDetails,
+}) => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  const relatedEvents = allEvents.filter(e => e.id !== event.id);
+  const relatedEvents = allEvents.filter((e) => e.id !== event.id);
 
   const handleRegistrationConfirm = () => {
     setShowConfirmModal(false);
@@ -25,7 +39,10 @@ const EventDetailsPage: React.FC<EventDetailsPageProps> = ({ event, addNotificat
     setTimeout(() => {
       setIsRegistering(false);
       setIsRegistered(true);
-      addNotification(`Anda telah berhasil terdaftar pada acara: ${event.title}`, 'success');
+      addNotification(
+        `Anda telah berhasil terdaftar pada acara: ${event.title}`,
+        "success"
+      );
     }, 1500);
   };
 
@@ -33,16 +50,23 @@ const EventDetailsPage: React.FC<EventDetailsPageProps> = ({ event, addNotificat
     <>
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <button onClick={() => navigateTo('home')} className="text-sm font-semibold text-sky-600 hover:underline mb-4">
-              &larr; Kembali ke Semua Acara
+          <button
+            onClick={() => navigateTo("agenda")}
+            className="text-sm font-semibold text-sky-600 hover:underline mb-4"
+          >
+            &larr; Kembali ke Semua Acara
           </button>
           <div className="bg-slate-800 text-white p-8 rounded-xl shadow-lg">
             <span className="text-amber-400 font-semibold">{event.year}</span>
-            <h1 className="text-3xl md:text-4xl font-bold mt-1">{event.title}</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mt-1">
+              {event.title}
+            </h1>
             <div className="flex flex-col sm:flex-row gap-x-6 gap-y-2 mt-4 text-sky-200">
               <div className="flex items-center gap-2">
                 <CalendarDaysIcon className="w-5 h-5" />
-                <span>{event.date.day} {event.date.month} {event.year}</span>
+                <span>
+                  {event.date} {event.year}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPinIcon className="w-5 h-5" />
@@ -59,58 +83,80 @@ const EventDetailsPage: React.FC<EventDetailsPageProps> = ({ event, addNotificat
                 <h2 className="text-xl font-bold">Deskripsi Acara</h2>
               </CardHeader>
               <CardContent>
-                <p className="text-slate-600 whitespace-pre-line">{event.details}</p>
+                <p className="text-slate-600 whitespace-pre-line">
+                  {event.details}
+                </p>
               </CardContent>
             </Card>
           </div>
-          
+
           <div className="lg:col-span-1 space-y-8">
             <Card className="sticky top-24">
               <CardHeader>
                 <h2 className="text-xl font-bold">Informasi & Pendaftaran</h2>
               </CardHeader>
               <CardContent className="space-y-4">
-                 <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 pt-1">
-                        <TicketIcon className="w-5 h-5 text-slate-400" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500">Biaya Registrasi</p>
-                      <p className="font-semibold text-sm text-slate-800">{event.registrationFee}</p>
-                    </div>
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 pt-1">
+                    <TicketIcon className="w-5 h-5 text-slate-400" />
                   </div>
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 pt-1">
-                        <UserCircleIcon className="w-5 h-5 text-slate-400" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500">Narahubung</p>
-                      <p className="font-semibold text-sm text-slate-800">{event.contactPerson.name}</p>
-                      <a href={`mailto:${event.contactPerson.email}`} className="text-xs text-sky-600 hover:underline block">{event.contactPerson.email}</a>
-                      <a href={`tel:${event.contactPerson.phone.replace(/\D/g, '')}`} className="text-xs text-sky-600 hover:underline block">{event.contactPerson.phone}</a>
-                    </div>
+                  <div>
+                    <p className="text-xs text-slate-500">Biaya Registrasi</p>
+                    <p className="font-semibold text-sm text-slate-800">
+                      {event.registrationFee}
+                    </p>
                   </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 pt-1">
+                    <UserCircleIcon className="w-5 h-5 text-slate-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500">Narahubung</p>
+                    <p className="font-semibold text-sm text-slate-800">
+                      {event.contactPerson.name}
+                    </p>
+                    <a
+                      href={`mailto:${event.contactPerson.email}`}
+                      className="text-xs text-sky-600 hover:underline block"
+                    >
+                      {event.contactPerson.email}
+                    </a>
+                    <a
+                      href={`tel:${event.contactPerson.phone.replace(
+                        /\D/g,
+                        ""
+                      )}`}
+                      className="text-xs text-sky-600 hover:underline block"
+                    >
+                      {event.contactPerson.phone}
+                    </a>
+                  </div>
+                </div>
               </CardContent>
               <CardFooter className="space-y-3">
                 {isRegistered ? (
                   <div className="text-center bg-green-100 p-6 rounded-lg border-2 border-green-200">
                     <CheckCircleIcon className="w-12 h-12 text-green-500 mx-auto mb-3" />
-                    <h3 className="text-xl font-bold text-green-800">Pendaftaran Berhasil!</h3>
+                    <h3 className="text-xl font-bold text-green-800">
+                      Pendaftaran Berhasil!
+                    </h3>
                     <p className="mt-1 text-sm text-green-700">
-                      Anda sudah terdaftar untuk acara ini. Sampai jumpa di sana!
+                      Anda sudah terdaftar untuk acara ini. Sampai jumpa di
+                      sana!
                     </p>
                   </div>
                 ) : (
-                  <button 
+                  <button
                     onClick={() => setShowConfirmModal(true)}
                     disabled={isRegistering}
                     className="w-full bg-amber-500 text-sky-900 font-bold py-3 px-4 rounded-md hover:bg-amber-400 transition-colors shadow-md disabled:bg-slate-400 disabled:cursor-not-allowed flex items-center justify-center"
                   >
-                    {isRegistering ? 'Mendaftarkan...' : 'Daftar Acara Ini'}
+                    {isRegistering ? "Mendaftarkan..." : "Daftar Acara Ini"}
                   </button>
                 )}
                 {event.materialsUrl && (
-                  <a 
+                  <a
                     href={event.materialsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -122,7 +168,7 @@ const EventDetailsPage: React.FC<EventDetailsPageProps> = ({ event, addNotificat
                 )}
               </CardFooter>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <h2 className="text-xl font-bold">Agenda Acara</h2>
@@ -132,10 +178,12 @@ const EventDetailsPage: React.FC<EventDetailsPageProps> = ({ event, addNotificat
                   {event.schedule.map((item, index) => (
                     <li key={index} className="flex items-start gap-3">
                       <div className="flex-shrink-0 pt-1">
-                          <ClockIcon className="w-5 h-5 text-slate-400" />
+                        <ClockIcon className="w-5 h-5 text-slate-400" />
                       </div>
                       <div>
-                        <p className="font-semibold text-sm text-slate-800">{item.activity}</p>
+                        <p className="font-semibold text-sm text-slate-800">
+                          {item.activity}
+                        </p>
                         <p className="text-xs text-slate-500">{item.time}</p>
                       </div>
                     </li>
@@ -148,23 +196,35 @@ const EventDetailsPage: React.FC<EventDetailsPageProps> = ({ event, addNotificat
 
         {relatedEvents.length > 0 && (
           <div className="mt-16 pt-8 border-t border-slate-200">
-            <h2 className="text-2xl font-bold text-center mb-8 text-slate-800">Acara Terkait Lainnya</h2>
+            <h2 className="text-2xl font-bold text-center mb-8 text-slate-800">
+              Acara Terkait Lainnya
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {relatedEvents.map(relatedEvent => (
+              {relatedEvents.map((relatedEvent) => (
                 <Card key={relatedEvent.id} className="flex flex-col">
                   <CardContent className="flex-grow">
                     <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 text-center bg-red-100 p-3 rounded-lg w-20">
-                            <p className="text-3xl font-bold text-red-600">{relatedEvent.date.day}</p>
-                            <p className="text-sm font-semibold text-red-500">{relatedEvent.date.month}</p>
-                        </div>
-                        <div>
-                            <span className="text-sm font-semibold text-slate-500">{relatedEvent.year}</span>
-                            <h3 className="text-lg font-bold text-slate-800">{relatedEvent.title}</h3>
-                            <p className="text-sm text-slate-500 mt-1">{relatedEvent.location}</p>
-                        </div>
+                      <div className="flex-shrink-0 text-center bg-red-100 p-3 rounded-lg w-20">
+                        <p className="text-3xl font-bold text-red-600">
+                          {relatedEvent.date}
+                        </p>
+                        {/* <p className="text-sm font-semibold text-red-500">{relatedEvent.date.month}</p> */}
+                      </div>
+                      <div>
+                        <span className="text-sm font-semibold text-slate-500">
+                          {relatedEvent.year}
+                        </span>
+                        <h3 className="text-lg font-bold text-slate-800">
+                          {relatedEvent.title}
+                        </h3>
+                        <p className="text-sm text-slate-500 mt-1">
+                          {relatedEvent.location}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-slate-600 mt-4 text-sm">{relatedEvent.description}</p>
+                    <p className="text-slate-600 mt-4 text-sm">
+                      {relatedEvent.description}
+                    </p>
                   </CardContent>
                   <CardFooter>
                     <button
@@ -189,8 +249,15 @@ const EventDetailsPage: React.FC<EventDetailsPageProps> = ({ event, addNotificat
           aria-labelledby="confirm-dialog-title"
         >
           <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm transform transition-all animate-fade-in-scale">
-            <h3 id="confirm-dialog-title" className="text-xl font-bold text-slate-900">Konfirmasi Pendaftaran</h3>
-            <p className="mt-2 text-slate-600">Apakah Anda yakin ingin mendaftar untuk acara "{event.title}"?</p>
+            <h3
+              id="confirm-dialog-title"
+              className="text-xl font-bold text-slate-900"
+            >
+              Konfirmasi Pendaftaran
+            </h3>
+            <p className="mt-2 text-slate-600">
+              Apakah Anda yakin ingin mendaftar untuk acara "{event.title}"?
+            </p>
             <div className="mt-6 flex justify-end gap-3">
               <button
                 onClick={() => setShowConfirmModal(false)}
@@ -205,7 +272,7 @@ const EventDetailsPage: React.FC<EventDetailsPageProps> = ({ event, addNotificat
                 Konfirmasi
               </button>
             </div>
-             <style>{`
+            <style>{`
                 @keyframes fade-in-scale {
                     0% { transform: scale(0.95); opacity: 0; }
                     100% { transform: scale(1); opacity: 1; }

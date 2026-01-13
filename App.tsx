@@ -7,6 +7,7 @@ import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import BeritaPage from "./pages/BeritaPage";
 import AgendaPage from "./pages/AgendaPage";
+import AdminPage from "./pages/AdminPage";
 import ForumPage from "./pages/ForumPage";
 import Kadin360Page from "./pages/Kadin360Page";
 import EventDetailsPage from "./pages/EventDetailsPage";
@@ -312,6 +313,8 @@ const App: React.FC = () => {
           return <ForumPage />;
         case "kadin360":
           return <Kadin360Page />;
+        case "admin":
+          return <AdminPage addNotification={addNotification} />;
         case "eventDetails":
           return selectedEvent ? (
             <EventDetailsPage

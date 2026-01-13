@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Page, AppNotification, NotificationType } from "../types";
 import { KadinLogo } from "./KadinLogo";
+import { Cog6ToothIcon } from "./icons";
+import supabase from "@/src/supabase-client";
 import {
   BellIcon,
   CheckCircleIcon,
@@ -184,6 +186,29 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) return;
+
+      const { data, error } = await supabase
+        .from("users")
+        .select("is_admin")
+        .eq("id", session.user.id)
+        .single();
+
+      if (!error && data?.is_admin) {
+        setIsAdmin(true);
+      }
+    };
+
+    checkAdmin();
+  }, []);
 
   const handleLogoutRequest = () => {
     setShowLogoutConfirm(true);
@@ -269,6 +294,15 @@ const Header: React.FC<HeaderProps> = ({
                   >
                     Kadin 360
                   </NavLink>
+                  {isAdmin && (
+                    <NavLink
+                      page="admin"
+                      currentPage={currentPage}
+                      navigateTo={navigateTo}
+                    >
+                      <span className="flex items-center gap-1">Admin</span>
+                    </NavLink>
+                  )}
                 </div>
                 <NotificationBell
                   notifications={notifications}

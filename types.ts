@@ -55,6 +55,15 @@ export interface KadinEvent {
   materialsUrl?: string;
 }
 
+export interface NewsItem {
+  id: string;
+  title: string;
+  category: string;
+  date: string;
+  excerpt: string;
+  imageUrl?: string;
+}
+
 export interface MemberProfile {
   id: number;
   name: string;

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Card, { CardContent, CardHeader, CardFooter } from "../components/Card";
-import { Page, RegistrationType, KadinEvent } from "../types";
+import supabase from "@/src/supabase-client";
+import { Page, RegistrationType, KadinEvent, NewsItem } from "../types";
 import {
   UserPlusIcon,
   ArrowPathIcon,
@@ -53,26 +54,26 @@ const slides = [
   },
 ];
 
-const latestNews = [
-  {
-    title: "KADIN Dorong Peningkatan Ekspor Produk UMKM ke Pasar Global",
-    category: "Ekonomi",
-    date: "23 September 2023",
-    excerpt:
-      "KADIN meluncurkan program baru untuk membantu UMKM menembus pasar internasional melalui pelatihan digital dan business matching.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=60",
-  },
-  {
-    title: "Regulasi Baru Terkait Pajak Digital Diterbitkan, Ini Kata KADIN",
-    category: "Regulasi",
-    date: "21 September 2023",
-    excerpt:
-      "Pemerintah resmi mengeluarkan peraturan menteri keuangan terbaru mengenai pajak untuk transaksi digital. KADIN memberikan beberapa catatan penting.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1542744173-05336fcc7ad4?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1102",
-  },
-];
+// const latestNews = [
+//   {
+//     title: "KADIN Dorong Peningkatan Ekspor Produk UMKM ke Pasar Global",
+//     category: "Ekonomi",
+//     date: "23 September 2023",
+//     excerpt:
+//       "KADIN meluncurkan program baru untuk membantu UMKM menembus pasar internasional melalui pelatihan digital dan business matching.",
+//     imageUrl:
+//       "https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=60",
+//   },
+//   {
+//     title: "Regulasi Baru Terkait Pajak Digital Diterbitkan, Ini Kata KADIN",
+//     category: "Regulasi",
+//     date: "21 September 2023",
+//     excerpt:
+//       "Pemerintah resmi mengeluarkan peraturan menteri keuangan terbaru mengenai pajak untuk transaksi digital. KADIN memberikan beberapa catatan penting.",
+//     imageUrl:
+//       "https://images.unsplash.com/photo-1542744173-05336fcc7ad4?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1102",
+//   },
+// ];
 
 const hotTopics = [
   {
@@ -103,6 +104,8 @@ const HomePage: React.FC<HomePageProps> = ({
   events,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const prevSlide = useCallback(() => {
     const isFirstSlide = currentIndex === 0;
@@ -115,6 +118,25 @@ const HomePage: React.FC<HomePageProps> = ({
     const newIndex = isLastSlide ? 0 : currentIndex + 1;
     setCurrentIndex(newIndex);
   }, [currentIndex]);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      const { data, error } = await supabase
+        .from("news")
+        .select("*")
+        .order("published_at", { ascending: false });
+
+      if (error) {
+        console.error(error);
+      } else {
+        setNews(data ?? []);
+      }
+
+      setLoading(false);
+    };
+
+    fetchNews();
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -238,32 +260,41 @@ const HomePage: React.FC<HomePageProps> = ({
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {latestNews.map((item, index) => (
-              <Card key={index} className="flex flex-col group overflow-hidden">
+            {news.map((item) => (
+              <Card
+                key={item.id}
+                className="flex flex-col group overflow-hidden"
+              >
                 <div className="overflow-hidden">
                   <img
-                    src={item.imageUrl}
+                    src={item.image_url || "/placeholder-news.jpg"}
                     alt={item.title}
                     className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
+
                 <CardContent className="flex-grow flex flex-col">
                   <div className="flex justify-between items-center mb-2">
                     <span className="px-2 py-1 text-xs font-semibold text-sky-800 bg-sky-100 rounded-full">
                       {item.category}
                     </span>
-                    <span className="text-xs text-slate-500">{item.date}</span>
+                    <span className="text-xs text-slate-500">
+                      {new Date(item.published_at).toLocaleDateString("id-ID")}
+                    </span>
                   </div>
+
                   <h3 className="text-lg font-bold text-slate-800 mb-2 flex-grow">
                     {item.title}
                   </h3>
+
                   <p className="text-sm text-slate-600 mb-4">{item.excerpt}</p>
+
                   <button
                     onClick={() => navigateTo("login")}
-                    className="font-semibold text-sky-600 hover:text-sky-800 self-start group/link inline-flex items-center"
+                    className="font-semibold text-sky-600 hover:text-sky-800 inline-flex items-center"
                   >
                     Baca Selengkapnya
-                    <ArrowRightIcon className="w-4 h-4 ml-1 group-hover/link:translate-x-1 transition-transform" />
+                    <ArrowRightIcon className="w-4 h-4 ml-1" />
                   </button>
                 </CardContent>
               </Card>

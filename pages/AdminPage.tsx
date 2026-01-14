@@ -1,5 +1,6 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Card, { CardContent, CardHeader } from "../components/Card";
+import supabase from "@/src/supabase-client";
 import {
   NewspaperIcon,
   CalendarDaysIcon,
@@ -58,7 +59,8 @@ const initialEvents: KadinEvent[] = [
 
 const AdminPage: React.FC<AdminPageProps> = ({ addNotification }) => {
   const [activeTab, setActiveTab] = useState<"news" | "events">("news");
-  const [news, setNews] = useState<NewsItem[]>(initialNews);
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [loadingNews, setLoadingNews] = useState(true);
   const [events, setEvents] = useState<KadinEvent[]>(initialEvents);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -67,8 +69,29 @@ const AdminPage: React.FC<AdminPageProps> = ({ addNotification }) => {
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
 
-  // Form Refs for File Upload (News only now)
   const newsImageInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetchNews();
+  }, []);
+
+  const fetchNews = async () => {
+    setLoadingNews(true);
+
+    const { data, error } = await supabase
+      .from("news")
+      .select("*")
+      .order("published_at", { ascending: false });
+
+    if (error) {
+      console.error(error);
+      addNotification("Gagal memuat berita", "error");
+    } else {
+      setNews(data as NewsItem[]);
+    }
+
+    setLoadingNews(false);
+  };
 
   // News Form State
   const [newsForm, setNewsForm] = useState({
@@ -88,24 +111,87 @@ const AdminPage: React.FC<AdminPageProps> = ({ addNotification }) => {
     registrationFee: "Gratis",
   });
 
-  const handleNewsImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setNewsForm((prev) => ({
-          ...prev,
-          imageUrl: event.target?.result as string,
-        }));
-      };
-      reader.readAsDataURL(e.target.files[0]);
+  // const handleNewsImageUpload = async (
+  //   e: React.ChangeEvent<HTMLInputElement>
+  // ) => {
+  //   const file = e.target.files?.[0];
+  //   if (!file) return;
+
+  //   const fileExt = file.name.split(".").pop();
+  //   const fileName = `${Date.now()}.${fileExt}`;
+  //   const filePath = `news/${fileName}`;
+
+  //   const { error: uploadError } = await supabase.storage
+  //     .from("news-images")
+  //     .upload(filePath, file);
+
+  //   if (uploadError) {
+  //     console.error(uploadError);
+  //     addNotification("Gagal upload gambar", "error");
+  //     return;
+  //   }
+
+  //   const { data } = supabase.storage
+  //     .from("news-images")
+  //     .getPublicUrl(filePath);
+
+  //   setNewsForm((prev) => ({
+  //     ...prev,
+  //     imageUrl: data.publicUrl,
+  //   }));
+  // };
+
+  const handleNewsImageUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Date.now()}.${fileExt}`;
+    const filePath = `news/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("news-images")
+      .upload(filePath, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error(uploadError);
+      addNotification("Gagal upload gambar", "error");
+      return;
     }
+
+    const { data } = supabase.storage
+      .from("news-images")
+      .getPublicUrl(filePath);
+
+    if (!data?.publicUrl) {
+      addNotification("Gagal mendapatkan URL gambar", "error");
+      return;
+    }
+
+    setNewsForm((prev) => ({
+      ...prev,
+      imageUrl: data.publicUrl,
+    }));
   };
 
-  const handleDeleteNews = (id: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus berita ini?")) {
-      setNews(news.filter((n) => n.id !== id));
-      addNotification("Berita berhasil dihapus.", "success");
+  const handleDeleteNews = async (id: string) => {
+    if (!confirm("Hapus berita ini?")) return;
+
+    const { error } = await supabase.from("news").delete().eq("id", id);
+
+    if (error) {
+      console.error(error);
+      addNotification("Gagal menghapus berita", "error");
+      return;
     }
+
+    addNotification("Berita berhasil dihapus", "success");
+    fetchNews();
   };
 
   const handleDeleteEvent = (id: string) => {
@@ -115,31 +201,86 @@ const AdminPage: React.FC<AdminPageProps> = ({ addNotification }) => {
     }
   };
 
-  const handleSaveNews = (e: React.FormEvent) => {
+  // const handleSaveNews = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+
+  //   const payload: any = {
+  //     title: newsForm.title,
+  //     category: newsForm.category,
+  //     excerpt: newsForm.excerpt,
+  //     published_at: new Date(newsForm.date).toISOString(),
+  //   };
+
+  //   if (newsForm.imageUrl) {
+  //     payload.image_url = newsForm.imageUrl;
+  //   }
+
+  //   let error;
+
+  //   if (editingItem) {
+  //     ({ error } = await supabase
+  //       .from("news")
+  //       .update(payload)
+  //       .eq("id", editingItem.id));
+  //   } else {
+  //     ({ error } = await supabase.from("news").insert(payload));
+  //   }
+
+  //   if (error) {
+  //     console.error(error);
+  //     addNotification("Gagal menyimpan berita", "error");
+  //     return;
+  //   }
+
+  //   addNotification(
+  //     editingItem ? "Berita diperbarui" : "Berita berhasil dibuat",
+  //     "success"
+  //   );
+
+  //   setIsNewsModalOpen(false);
+  //   setEditingItem(null);
+  //   fetchNews();
+  // };
+
+  const handleSaveNews = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newItem = {
-      id: editingItem
-        ? editingItem.id
-        : Math.random().toString(36).substr(2, 9),
-      ...newsForm,
+
+    const payload: any = {
+      title: newsForm.title,
+      category: newsForm.category,
+      excerpt: newsForm.excerpt,
+      published_at: new Date(newsForm.date).toISOString(),
     };
 
-    if (editingItem) {
-      setNews(news.map((n) => (n.id === editingItem.id ? newItem : n)));
-      addNotification("Berita berhasil diperbarui.", "success");
-    } else {
-      setNews([newItem, ...news]);
-      addNotification("Berita baru berhasil dibuat.", "success");
+    if (newsForm.imageUrl) {
+      payload.image_url = newsForm.imageUrl;
     }
+
+    let error;
+
+    if (editingItem) {
+      ({ error } = await supabase
+        .from("news")
+        .update(payload)
+        .eq("id", editingItem.id));
+    } else {
+      ({ error } = await supabase.from("news").insert(payload));
+    }
+
+    if (error) {
+      console.error(error);
+      addNotification("Gagal menyimpan berita", "error");
+      return;
+    }
+
+    addNotification(
+      editingItem ? "Berita diperbarui" : "Berita berhasil dibuat",
+      "success"
+    );
+
     setIsNewsModalOpen(false);
     setEditingItem(null);
-    setNewsForm({
-      title: "",
-      category: "Ekonomi",
-      excerpt: "",
-      date: new Date().toISOString().split("T")[0],
-      imageUrl: "",
-    });
+    fetchNews();
   };
 
   const handleSaveEvent = (e: React.FormEvent) => {
@@ -183,7 +324,15 @@ const AdminPage: React.FC<AdminPageProps> = ({ addNotification }) => {
 
   const openEditNews = (item: NewsItem) => {
     setEditingItem(item);
-    setNewsForm({ ...item, imageUrl: item.imageUrl || "" });
+    setNewsForm({
+      title: item.title,
+      category: item.category,
+      excerpt: item.excerpt,
+      date: item.published_at
+        ? item.published_at.split("T")[0]
+        : new Date().toISOString().split("T")[0],
+      imageUrl: item.image_url || "",
+    });
     setIsNewsModalOpen(true);
   };
 
@@ -338,7 +487,16 @@ const AdminPage: React.FC<AdminPageProps> = ({ addNotification }) => {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                          {item.date}
+                          {item.published_at
+                            ? new Date(item.published_at).toLocaleDateString(
+                                "id-ID",
+                                {
+                                  day: "numeric",
+                                  month: "long",
+                                  year: "numeric",
+                                }
+                              )
+                            : "-"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex justify-end gap-3">

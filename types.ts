@@ -62,6 +62,8 @@ export interface NewsItem {
   date: string;
   excerpt: string;
   imageUrl?: string;
+  published_at?: string;
+  image_url?: string;
 }
 
 export interface MemberProfile {

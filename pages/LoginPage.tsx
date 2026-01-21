@@ -34,13 +34,6 @@ const LoginPage: React.FC<LoginPageProps> = ({
       password,
     });
 
-    // if (error || !data.session) {
-    //   setError("Email atau password salah. Silakan coba lagi.");
-    //   setIsLoading(false);
-    //   return;
-    // }
-    // window.location.replace(redirectUrl);
-
     if (error) {
       setError("Email atau password salah. Silakan coba lagi.");
       setIsLoading(false);
@@ -50,13 +43,6 @@ const LoginPage: React.FC<LoginPageProps> = ({
     setIsLoading(false);
   };
 
-  // const handleSocialLogin = (provider: "Google" | "LinkedIn") => {
-  //   addNotification(
-  //     `Fitur login dengan ${provider} akan segera tersedia.`,
-  //     "info"
-  //   );
-  // };
-
   const handleSocialLogin = async (provider: "google" | "linkedin") => {
     await supabase.auth.signInWithOAuth({
       provider,
@@ -65,15 +51,6 @@ const LoginPage: React.FC<LoginPageProps> = ({
       },
     });
   };
-
-  // ini edit
-  // useEffect(() => {
-  //   supabase.auth.getSession().then(({ data }) => {
-  //     if (data.session) {
-  //       window.location.replace(redirectUrl);
-  //     }
-  //   });
-  // }, []);
 
   return (
     <div className="max-w-md mx-auto">

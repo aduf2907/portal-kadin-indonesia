@@ -128,23 +128,6 @@ const RegistrationPage: React.FC<RegistrationPageProps> = ({
     setStep("ACCOUNT_CREATION");
   };
 
-  // const handleAccountSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if (formData.password !== formData.confirmPassword) {
-  //     addNotification("Password dan konfirmasi password tidak cocok.", "error");
-  //     return;
-  //   }
-  //   setIsLoading(true);
-  //   // Simulate API call
-  //   setTimeout(() => {
-  //     console.log("Simulating OTP sent to", formData.email);
-  //     addNotification(`Kode OTP telah dikirim ke ${formData.email}`, "info");
-  //     setIsLoading(false);
-  //     setStep("OTP");
-  //     setResendCooldown(30);
-  //   }, 1500);
-  // };
-
   const handleAccountSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
@@ -186,33 +169,6 @@ const RegistrationPage: React.FC<RegistrationPageProps> = ({
     setResendCooldown(30); // Reset cooldown to 30 seconds
     setOtpError(""); // Clear previous errors
   };
-
-  // const handleOtpSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   setIsLoading(true);
-  //   setOtpError("");
-  //   setIsVerified(false);
-
-  //   // Simulate OTP verification
-  //   setTimeout(() => {
-  //     if (otp === "123456") {
-  //       setIsLoading(false);
-  //       setIsVerified(true);
-  //       // Wait a moment to show success state before transitioning
-  //       setTimeout(() => {
-  //         addNotification(
-  //           "Akun Anda berhasil dibuat. Silakan login untuk melanjutkan.",
-  //           "success"
-  //         );
-  //         setStep("SUCCESS");
-  //       }, 1000);
-  //     } else {
-  //       setOtpError("Kode OTP salah. Silakan coba lagi.");
-  //       setIsLoading(false);
-  //       setIsVerified(false);
-  //     }
-  //   }, 1500);
-  // };
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

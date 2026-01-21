@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Card, { CardContent, CardFooter, CardHeader } from "../components/Card";
 import { KadinEvent, NotificationType, Page } from "../types";
 import {
@@ -10,27 +10,66 @@ import {
   UserCircleIcon,
   ArrowDownTrayIcon,
 } from "../components/icons";
+import supabase from "@/src/supabase-client";
 
 interface EventDetailsPageProps {
-  event: KadinEvent;
+  eventId?: string;
   addNotification: (message: string, type: NotificationType) => void;
   navigateTo: (page: Page) => void;
-  allEvents: KadinEvent[];
   viewEventDetails: (eventId: string) => void;
+  // event: KadinEvent;
+  // allEvents: KadinEvent[];
 }
 
 const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
-  event,
+  eventId,
   addNotification,
   navigateTo,
-  allEvents,
   viewEventDetails,
 }) => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [event, setEvent] = useState<KadinEvent | null>(null);
+  const [relatedEvent, setRelatedEvents] = useState<KadinEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
-  const relatedEvents = allEvents.filter((e) => e.id !== event.id);
+  // const relatedEvents = allEvents.filter((e) => e.id !== event.id);
+
+  useEffect(() => {
+    const fetchEventDetail = async () => {
+      setLoading(true);
+
+      // 1️⃣ ambil event utama
+      const { data: eventData, error } = await supabase
+        .from("events")
+        .select("*")
+        .eq("id", eventId)
+        .single();
+
+      if (error) {
+        console.error("Error fetch event:", error);
+        setLoading(false);
+        return;
+      }
+
+      setEvent(eventData);
+
+      // 2️⃣ ambil event lain (related)
+      const { data: relatedData } = await supabase
+        .from("events")
+        .select("*")
+        .neq("id", eventId)
+        .order("date", { ascending: false })
+        .limit(4);
+
+      setRelatedEvents(relatedData ?? []);
+      setLoading(false);
+    };
+
+    fetchEventDetail();
+  }, [eventId]);
 
   const handleRegistrationConfirm = () => {
     setShowConfirmModal(false);
@@ -41,10 +80,28 @@ const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
       setIsRegistered(true);
       addNotification(
         `Anda telah berhasil terdaftar pada acara: ${event.title}`,
-        "success"
+        "success",
       );
     }, 1500);
   };
+
+  if (loading) {
+    return <div className="text-center py-20">Loading...</div>;
+  }
+
+  if (!event) {
+    return (
+      <div className="text-center py-20">
+        <p>Event tidak ditemukan</p>
+        <button
+          onClick={() => navigateTo("agenda")}
+          className="mt-4 text-sky-600 underline"
+        >
+          Kembali ke agenda
+        </button>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -125,7 +182,7 @@ const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
                     <a
                       href={`tel:${event.contactPerson.phone.replace(
                         /\D/g,
-                        ""
+                        "",
                       )}`}
                       className="text-xs text-sky-600 hover:underline block"
                     >
@@ -194,13 +251,13 @@ const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
           </div>
         </div>
 
-        {relatedEvents.length > 0 && (
+        {relatedEvent.length > 0 && (
           <div className="mt-16 pt-8 border-t border-slate-200">
             <h2 className="text-2xl font-bold text-center mb-8 text-slate-800">
               Acara Terkait Lainnya
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {relatedEvents.map((relatedEvent) => (
+              {relatedEvent.map((relatedEvent) => (
                 <Card key={relatedEvent.id} className="flex flex-col">
                   <CardContent className="flex-grow">
                     <div className="flex items-start gap-4">

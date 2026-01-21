@@ -136,6 +136,7 @@ const App: React.FC = () => {
   const [registrationType, setRegistrationType] =
     useState<RegistrationType>("Daftar Baru");
   const [selectedEvent, setSelectedEvent] = useState<KadinEvent | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
   // Notification State
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
@@ -238,7 +239,7 @@ const App: React.FC = () => {
 
   const markNotificationAsRead = (id: number) => {
     setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
     );
   };
 
@@ -266,7 +267,7 @@ const App: React.FC = () => {
     setTimeout(() => {
       addNotification(
         "Pengingat: KTA Anda akan berakhir dalam 30 hari. Segera lakukan perpanjangan.",
-        "warning"
+        "warning",
       );
     }, 2000);
   };
@@ -283,12 +284,18 @@ const App: React.FC = () => {
     navigateTo("register");
   };
 
+  // const handleViewEventDetails = (eventId: string) => {
+  //   const event = upcomingEvents.find((e) => e.id === eventId);
+  //   if (event) {
+  //     setSelectedEvent(event);
+  //     navigateTo("eventDetails");
+  //   }
+  // };
+
   const handleViewEventDetails = (eventId: string) => {
-    const event = upcomingEvents.find((e) => e.id === eventId);
-    if (event) {
-      setSelectedEvent(event);
-      navigateTo("eventDetails");
-    }
+    console.log("Navigate to event: ", eventId);
+    setSelectedEventId(eventId);
+    navigateTo("eventDetails");
   };
 
   const renderPage = () => {
@@ -301,7 +308,7 @@ const App: React.FC = () => {
         case "agenda":
           return (
             <AgendaPage
-              events={upcomingEvents}
+              // events={upcomingEvents}
               viewEventDetails={handleViewEventDetails}
               isAuthenticated={isAuthenticated}
               navigateTo={navigateTo}
@@ -318,10 +325,10 @@ const App: React.FC = () => {
         case "eventDetails":
           return selectedEvent ? (
             <EventDetailsPage
-              event={selectedEvent}
+              // event={selectedEvent}
               addNotification={addNotification}
               navigateTo={navigateTo}
-              allEvents={upcomingEvents}
+              // allEvents={upcomingEvents}
               viewEventDetails={handleViewEventDetails}
             />
           ) : (

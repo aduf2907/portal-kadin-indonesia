@@ -18,50 +18,32 @@ interface AdminPageProps {
   addNotification: (message: string, type: NotificationType) => void;
 }
 
-const initialNews: NewsItem[] = [
-  {
-    id: "1",
-    title: "KADIN Dorong Peningkatan Ekspor Produk UMKM ke Pasar Global",
-    category: "Ekonomi",
-    date: "2023-09-23",
-    excerpt:
-      "KADIN meluncurkan program baru untuk membantu UMKM menembus pasar internasional.",
-  },
-  {
-    id: "2",
-    title: "Regulasi Baru Terkait Pajak Digital Diterbitkan",
-    category: "Regulasi",
-    date: "2023-09-21",
-    excerpt:
-      "Pemerintah resmi mengeluarkan peraturan menteri keuangan terbaru mengenai pajak digital.",
-  },
-];
-
-const initialEvents: KadinEvent[] = [
-  {
-    id: "rapimnas-2025",
-    date: "2025-11-30",
-    year: "2026",
-    title: "RAPIMNAS Kadin 2025",
-    location: "Jakarta Convention Center, Jakarta",
-    description:
-      "Rapat Pimpinan Nasional KADIN untuk membahas arah kebijakan dan strategi ekonomi nasional.",
-    details: "Full details here...",
-    schedule: [],
-    registrationFee: "Rp 1.500.000,-",
-    contactPerson: {
-      name: "Sekretariat",
-      email: "event@kadin.id",
-      phone: "021-1234",
-    },
-  },
-];
+// const initialEvents: KadinEvent[] = [
+//   {
+//     id: "rapimnas-2025",
+//     date: "2025-11-30",
+//     year: "2026",
+//     title: "RAPIMNAS Kadin 2025",
+//     location: "Jakarta Convention Center, Jakarta",
+//     description:
+//       "Rapat Pimpinan Nasional KADIN untuk membahas arah kebijakan dan strategi ekonomi nasional.",
+//     details: "Full details here...",
+//     schedule: [],
+//     registrationFee: "Rp 1.500.000,-",
+//     contactPerson: {
+//       name: "Sekretariat",
+//       email: "event@kadin.id",
+//       phone: "021-1234",
+//     },
+//   },
+// ];
 
 const AdminPage: React.FC<AdminPageProps> = ({ addNotification }) => {
   const [activeTab, setActiveTab] = useState<"news" | "events">("news");
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loadingNews, setLoadingNews] = useState(true);
-  const [events, setEvents] = useState<KadinEvent[]>(initialEvents);
+  const [events, setEvents] = useState<KadinEvent[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   // Modals
@@ -73,6 +55,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ addNotification }) => {
 
   useEffect(() => {
     fetchNews();
+    fetchEvents();
   }, []);
 
   const fetchNews = async () => {
@@ -102,47 +85,35 @@ const AdminPage: React.FC<AdminPageProps> = ({ addNotification }) => {
     imageUrl: "",
   });
 
+  const fetchEvents = async () => {
+    setLoadingEvents(true);
+
+    const { data, error } = await supabase
+      .from("events")
+      .select("*")
+      .order("date", { ascending: false });
+
+    if (error) {
+      console.error(error);
+      addNotification("Gagal memuat agenda", "error");
+    } else {
+      setEvents(data as KadinEvent[]);
+    }
+
+    setLoadingEvents(false);
+  };
+
   // Event Form State
   const [eventForm, setEventForm] = useState({
     title: "",
+    date: "",
     location: "",
-    date: new Date().toISOString().split("T")[0],
     description: "",
-    registrationFee: "Gratis",
+    registration_fee: "",
   });
 
-  // const handleNewsImageUpload = async (
-  //   e: React.ChangeEvent<HTMLInputElement>
-  // ) => {
-  //   const file = e.target.files?.[0];
-  //   if (!file) return;
-
-  //   const fileExt = file.name.split(".").pop();
-  //   const fileName = `${Date.now()}.${fileExt}`;
-  //   const filePath = `news/${fileName}`;
-
-  //   const { error: uploadError } = await supabase.storage
-  //     .from("news-images")
-  //     .upload(filePath, file);
-
-  //   if (uploadError) {
-  //     console.error(uploadError);
-  //     addNotification("Gagal upload gambar", "error");
-  //     return;
-  //   }
-
-  //   const { data } = supabase.storage
-  //     .from("news-images")
-  //     .getPublicUrl(filePath);
-
-  //   setNewsForm((prev) => ({
-  //     ...prev,
-  //     imageUrl: data.publicUrl,
-  //   }));
-  // };
-
   const handleNewsImageUpload = async (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -194,53 +165,20 @@ const AdminPage: React.FC<AdminPageProps> = ({ addNotification }) => {
     fetchNews();
   };
 
-  const handleDeleteEvent = (id: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus agenda ini?")) {
-      setEvents(events.filter((e) => e.id !== id));
-      addNotification("Agenda berhasil dihapus.", "success");
+  const handleDeleteEvents = async (id: string) => {
+    if (!confirm("Hapus agenda ini?")) return;
+
+    const { error } = await supabase.from("events").delete().eq("id", id);
+
+    if (error) {
+      console.error(error);
+      addNotification("Gagal menghapus agenda", "error");
+      return;
     }
+
+    addNotification("Agenda berhasil dihapus", "success");
+    fetchEvents();
   };
-
-  // const handleSaveNews = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-
-  //   const payload: any = {
-  //     title: newsForm.title,
-  //     category: newsForm.category,
-  //     excerpt: newsForm.excerpt,
-  //     published_at: new Date(newsForm.date).toISOString(),
-  //   };
-
-  //   if (newsForm.imageUrl) {
-  //     payload.image_url = newsForm.imageUrl;
-  //   }
-
-  //   let error;
-
-  //   if (editingItem) {
-  //     ({ error } = await supabase
-  //       .from("news")
-  //       .update(payload)
-  //       .eq("id", editingItem.id));
-  //   } else {
-  //     ({ error } = await supabase.from("news").insert(payload));
-  //   }
-
-  //   if (error) {
-  //     console.error(error);
-  //     addNotification("Gagal menyimpan berita", "error");
-  //     return;
-  //   }
-
-  //   addNotification(
-  //     editingItem ? "Berita diperbarui" : "Berita berhasil dibuat",
-  //     "success"
-  //   );
-
-  //   setIsNewsModalOpen(false);
-  //   setEditingItem(null);
-  //   fetchNews();
-  // };
 
   const handleSaveNews = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -275,7 +213,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ addNotification }) => {
 
     addNotification(
       editingItem ? "Berita diperbarui" : "Berita berhasil dibuat",
-      "success"
+      "success",
     );
 
     setIsNewsModalOpen(false);
@@ -283,44 +221,77 @@ const AdminPage: React.FC<AdminPageProps> = ({ addNotification }) => {
     fetchNews();
   };
 
-  const handleSaveEvent = (e: React.FormEvent) => {
+  const handleSaveEvent = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newEvent: KadinEvent = {
-      id: editingItem
-        ? editingItem.id
-        : Math.random().toString(36).substr(2, 9),
+
+    const payload = {
       title: eventForm.title,
-      location: eventForm.location,
       date: eventForm.date,
-      year: eventForm.title,
+      location: eventForm.location,
       description: eventForm.description,
-      details: eventForm.description,
-      schedule: [],
-      registrationFee: eventForm.registrationFee,
-      contactPerson: {
-        name: "Admin Kadin",
-        email: "admin@kadin.id",
-        phone: "021-0000",
-      },
+      registration_fee: eventForm.registration_fee,
     };
 
+    let error;
+
     if (editingItem) {
-      setEvents(events.map((ev) => (ev.id === editingItem.id ? newEvent : ev)));
-      addNotification("Agenda berhasil diperbarui.", "success");
+      ({ error } = await supabase
+        .from("events")
+        .update(payload)
+        .eq("id", editingItem.id));
     } else {
-      setEvents([newEvent, ...events]);
-      addNotification("Agenda baru berhasil dibuat.", "success");
+      ({ error } = await supabase.from("events").insert(payload));
     }
+
+    if (error) {
+      console.error(error);
+      addNotification("Agenda berhasil diperbarui.", "success");
+      return;
+    }
+
     setIsEventModalOpen(false);
     setEditingItem(null);
-    setEventForm({
-      title: "",
-      location: "",
-      date: new Date().toISOString().split("T")[0],
-      description: "",
-      registrationFee: "Gratis",
-    });
+    fetchEvents();
   };
+
+  // const handleSaveEvent = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   const newEvent: KadinEvent = {
+  //     id: editingItem
+  //       ? editingItem.id
+  //       : Math.random().toString(36).substr(2, 9),
+  //     title: eventForm.title,
+  //     location: eventForm.location,
+  //     date: eventForm.date,
+  //     year: eventForm.title,
+  //     description: eventForm.description,
+  //     details: eventForm.description,
+  //     schedule: [],
+  //     registrationFee: eventForm.registrationFee,
+  //     contactPerson: {
+  //       name: "Admin Kadin",
+  //       email: "admin@kadin.id",
+  //       phone: "021-0000",
+  //     },
+  //   };
+
+  //   if (editingItem) {
+  //     setEvents(events.map((ev) => (ev.id === editingItem.id ? newEvent : ev)));
+  //     addNotification("Agenda berhasil diperbarui.", "success");
+  //   } else {
+  //     setEvents([newEvent, ...events]);
+  //     addNotification("Agenda baru berhasil dibuat.", "success");
+  //   }
+  //   setIsEventModalOpen(false);
+  //   setEditingItem(null);
+  //   setEventForm({
+  //     title: "",
+  //     location: "",
+  //     date: new Date().toISOString().split("T")[0],
+  //     description: "",
+  //     registrationFee: "Gratis",
+  //   });
+  // };
 
   const openEditNews = (item: NewsItem) => {
     setEditingItem(item);
@@ -343,7 +314,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ addNotification }) => {
       location: item.location,
       date: item.date,
       description: item.description,
-      registrationFee: item.registrationFee,
+      registration_fee: item.registrationFee,
     });
     setIsEventModalOpen(true);
   };
@@ -386,7 +357,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ addNotification }) => {
                   location: "",
                   date: new Date().toISOString().split("T")[0],
                   description: "",
-                  registrationFee: "Gratis",
+                  registration_fee: "Gratis",
                 });
                 setIsEventModalOpen(true);
               }}
@@ -458,7 +429,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ addNotification }) => {
               {activeTab === "news"
                 ? news
                     .filter((n) =>
-                      n.title.toLowerCase().includes(searchTerm.toLowerCase())
+                      n.title.toLowerCase().includes(searchTerm.toLowerCase()),
                     )
                     .map((item) => (
                       <tr key={item.id} className="hover:bg-slate-50 group">
@@ -494,7 +465,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ addNotification }) => {
                                   day: "numeric",
                                   month: "long",
                                   year: "numeric",
-                                }
+                                },
                               )
                             : "-"}
                         </td>
@@ -518,7 +489,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ addNotification }) => {
                     ))
                 : events
                     .filter((e) =>
-                      e.title.toLowerCase().includes(searchTerm.toLowerCase())
+                      e.title.toLowerCase().includes(searchTerm.toLowerCase()),
                     )
                     .map((item) => (
                       <tr key={item.id} className="hover:bg-slate-50">
@@ -546,7 +517,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ addNotification }) => {
                               <PencilSquareIcon className="w-5 h-5" />
                             </button>
                             <button
-                              onClick={() => handleDeleteEvent(item.id)}
+                              onClick={() => handleDeleteEvents(item.id)}
                               className="text-red-600 hover:text-red-900"
                             >
                               <TrashIcon className="w-5 h-5" />
@@ -735,7 +706,10 @@ const AdminPage: React.FC<AdminPageProps> = ({ addNotification }) => {
                       className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-amber-500 outline-none"
                       value={eventForm.date}
                       onChange={(e) =>
-                        setEventForm({ ...eventForm, date: e.target.value })
+                        setEventForm({
+                          ...eventForm,
+                          date: e.target.value,
+                        })
                       }
                     />
                   </div>
@@ -747,11 +721,11 @@ const AdminPage: React.FC<AdminPageProps> = ({ addNotification }) => {
                       type="text"
                       placeholder="Gratis atau Rp 1.500.000"
                       className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-amber-500 outline-none"
-                      value={eventForm.registrationFee}
+                      value={eventForm.registration_fee}
                       onChange={(e) =>
                         setEventForm({
                           ...eventForm,
-                          registrationFee: e.target.value,
+                          registration_fee: e.target.value,
                         })
                       }
                     />

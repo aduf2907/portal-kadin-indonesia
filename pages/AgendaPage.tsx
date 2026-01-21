@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Card, { CardContent, CardFooter } from "../components/Card";
 import { KadinEvent, Page } from "../types";
+import supabase from "@/src/supabase-client";
 import {
   CalendarDaysIcon,
   MapPinIcon,
@@ -8,7 +9,6 @@ import {
 } from "../components/icons";
 
 interface AgendaPageProps {
-  events: KadinEvent[];
   viewEventDetails: (eventId: string) => void;
   isAuthenticated: boolean;
   navigateTo: (page: Page) => void;
@@ -30,7 +30,6 @@ const months = [
 ];
 
 const AgendaPage: React.FC<AgendaPageProps> = ({
-  events,
   viewEventDetails,
   isAuthenticated,
   navigateTo,
@@ -43,6 +42,25 @@ const AgendaPage: React.FC<AgendaPageProps> = ({
       year: date.getFullYear().toString(),
     };
   };
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const { data, error } = await supabase
+        .from("events")
+        .select("*")
+        .order("date", { ascending: false });
+
+      if (error) {
+        console.error(error);
+      } else {
+        setEvents(data ?? []);
+      }
+      setLoading(false);
+    };
+    fetchEvents();
+  }, []);
 
   return (
     <div className="max-w-5xl mx-auto">

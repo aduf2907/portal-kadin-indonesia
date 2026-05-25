@@ -1,20 +1,66 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# KADIN Membership 
 
-# Run and deploy your AI Studio app
+Aplikasi web yang dirancang untuk mengelola proses keanggotaan KADIN Indonesia, termasuk registrasi member, perpanjangan keanggotaan, dan pengelolaan data anggota sesuai dengan prosedur resmi. Sistem ini membantu mempermudah alur administrasi sehingga proses pengelolaan membership menjadi lebih terstruktur dan efisien.
 
-This contains everything you need to run your app locally.
+## 🚀 Features
 
-View your app in AI Studio: https://ai.studio/apps/drive/1_bs6j_o20cGXXqwkbyyVqN6W-9sx5xG9
+- Registrasi dan perpanjangan member
+- Pengelolaan data anggota
+- Integrasi database menggunakan Supabase
+- Sistem administrasi membership
+- Validasi data pengguna
+- Responsive user interface
 
-## Run Locally
+## 🛠️ Tech Stack
 
-**Prerequisites:**  Node.js
+- React.js
+- Google AI Studio
+- Supabase
+- Tailwind CSS
+- Vite
 
+## 👨‍💻 Role
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+Backend Developer — berfokus pada perancangan dan pengelolaan database menggunakan Supabase serta mendukung integrasi data pada sistem membership.
+
+## 📦 Installation
+
+### Prerequisites
+- Node.js
+- npm
+
+### Run Locally
+
+1. Clone repository
+
+```bash
+git clone https://github.com/aduf2907/portal-kadin-indonesia.git
+```
+
+2. Install dependencies
+
+```bash
+npm install
+```
+
+3. Setup environment variables
+
+Buat file `.env.local` lalu tambahkan:
+
+```env
+GEMINI_API_KEY=your_api_key
+```
+
+4. Jalankan project
+
+```bash
+npm run dev
+```
+
+## 🌐 Demo
+
+https://kadin-membership.netlify.app/
+
+## 📁 Repository
+
+https://github.com/aduf2907/portal-kadin-indonesia
